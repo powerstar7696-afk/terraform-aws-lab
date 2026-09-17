@@ -1,0 +1,15 @@
+# Terraform generated/state files
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+*.tfplan
+
+# Secrets
+*.tfvars.json
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
