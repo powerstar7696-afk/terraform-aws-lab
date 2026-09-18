@@ -1,0 +1,58 @@
+pipeline {
+    agent any
+
+    stages {
+
+        stage('Checkout') {
+            steps {
+                git(
+                    url: 'git@github.com:powerstar7696-afk/terraform-aws-lab.git',
+                    credentialsId: 'github-terraform-ssh',
+                    branch: 'main'
+                )
+            }
+        }
+
+        stage('Terraform Version') {
+             steps {
+                 sh 'terraform version'
+             }
+        }
+
+        stage('Terraform Init') {
+            steps {
+                sh '''
+                    terraform init \
+                      -backend-config="bucket=terraform-state-345485442601-1789473168" \
+                      -backend-config="region=ap-south-1" \
+                      -backend-config="key=terraform/dev/terraform.tfstate"
+                '''
+            }
+        }
+
+        stage('Terraform Validate') {
+            steps {
+                sh 'terraform validate'
+            }
+        }
+
+        stage('Terraform Plan') {
+            steps {
+                sh 'terraform plan -var-file="environments/dev.tfvars"'
+            }
+        }
+        
+        stage('Approval') {
+            steps {
+                input message: 'Do you want to apply these Terraform changes?', 
+                      ok: 'Approve'
+            }
+        }
+        
+        stage('Terraform Apply') {
+            steps {
+                sh 'terraform apply -auto-approve -var-file="environments/dev.tfvars"'
+            }
+        }
+    }
+}
